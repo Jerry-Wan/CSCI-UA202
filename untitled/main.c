@@ -5,15 +5,18 @@
 #include <stdlib.h>
 
 int main() {
-    int algo;
+    int algo;      
     int process;
     char str[51];
     int status;
     int p;
     char command;
     printf("Enter the number of processes\n");
-    while(fgets( process, 50, stdin) <=0 && fgets( process, 50, stdin)!= NULL){
-        printf("Enter the number of processes\n");
+    while(fgets( process, 50, stdin) != NULL){
+        if(process <= 0) {
+            printf("Enter the number of processes\n");
+        }
+        fgets( process, 50, stdin);
     }
     printf("Enter the scheduling algorithm to use. 1 signifies FIFO; 2 signifies RR with quantum q\n");
     while(fgets( algo, 50, stdin) != 1 && fgets( algo, 50, stdin) != 2 && fgets( algo, 50, stdin)!= NULL){
