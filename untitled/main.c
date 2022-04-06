@@ -7,22 +7,15 @@
 int main() {
     int algo;      
     int process;
+    int quant = 0;
     char str[51];
     int status;
     int p;
     char command;
-    printf("Enter the number of processes\n");
-    while(fgets( process, 50, stdin) != NULL){
-        if(process <= 0) {
-            printf("Enter the number of processes\n");
-        }
-        fgets( process, 50, stdin);
-    }
-    printf("Enter the scheduling algorithm to use. 1 signifies FIFO; 2 signifies RR with quantum q\n");
-    while(fgets( algo, 50, stdin) != 1 && fgets( algo, 50, stdin) != 2 && fgets( algo, 50, stdin)!= NULL){
-        printf("Enter the scheduling algorithm to use. 1 signifies FIFO; 2 signifies RR with quantum q\n");
-    }
 
-        printf("%d %d",process,algo);
+    fgets(str, sizeof(str), stdin);
+    printf("%s",str);
+
+
     return 0;
 }
