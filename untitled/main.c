@@ -9,11 +9,8 @@ int main() {
     char* process;
     char* quant;
     char str[51];
-    char test[51][1];
-    int status;
+    char** processes = NULL;
 
-    char command;
-    int test_n = 0;
 
     fgets(str, sizeof(str), stdin);
     //printf("%s",str);
