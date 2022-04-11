@@ -19,12 +19,50 @@ struct Process{
     int phase_time[100];
 };
 
-int main(int argc, char **argv){
+int main(int argc){
+
+    char* algo;
+    char* process;
+    char* quant;
+    char str[51];
+    char test[51][1];
+    int status;
+
+    char command;
+    int test_n = 0;
+
+    fgets(str, sizeof(str), stdin);
+    //printf("%s",str);
+
+    char ** argv  = NULL;
+    char * p    = strtok (str, " ");
+    int n_spaces = 0, i;
+
+    while (p) {
+        printf("%s",p);
+        argv = realloc (argv, sizeof (char*) * ++n_spaces);
+
+        if (argv == NULL)
+            exit (-1); /* memory allocation failed */
+
+        argv[n_spaces-1] = p;
+
+        p = strtok (NULL, " ");
+    }
+
+
+    argv = realloc (argv, sizeof (char*) * (n_spaces+1));
+    argv[n_spaces] = 0;
+
+    algo = argv[1];
+
+    //printf("%d\n",sizeof(argv));
+
 
     int n=atoi(argv[1]);
-    int SA=atoi(argv[2]);
+    int SA=atoi(argv[0]);
 
-    if(SA==1){
+    if(SA == 1){
         //FIFO
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
         struct Process processes[100];
