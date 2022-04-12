@@ -19,24 +19,16 @@ struct Process{
     int phase_time[100];
 };
 
-int main(int argc){
+int main(){
 
-    char* algo;
-    char* process;
-    char* quant;
     char str[51];
-    char test[51][1];
-    int status;
-
-    char command;
-    int test_n = 0;
 
     fgets(str, sizeof(str), stdin);
     //printf("%s",str);
 
     char ** argv  = NULL;
-    char * p    = strtok (str, " ");
-    int n_spaces = 0, i;
+    char * p  = strtok (str, " ");
+    int n_spaces = 0;
 
     while (p) {
         printf("%s",p);
@@ -54,19 +46,14 @@ int main(int argc){
     argv = realloc (argv, sizeof (char*) * (n_spaces+1));
     argv[n_spaces] = 0;
 
-    algo = argv[1];
-
-    //printf("%d\n",sizeof(argv));
-
 
     int n=atoi(argv[1]);
-    int SA=atoi(argv[0]);
+    int algo=atoi(argv[0]);
 
-    if(SA == 1){
+    if(algo == 1){
         //FIFO
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
         struct Process processes[100];
-        int currentTime=0;
         int maxCycle=0;
         int isIdle=1;
         int done=0;
@@ -76,10 +63,10 @@ int main(int argc){
         for (int i=0; i<n; i++){
             struct Process p;
             p.processNumber=i;
-            p.R1=atoi(argv[3+i*4]);
-            p.B1=atoi(argv[3+1+i*4]);
-            p.R2=atoi(argv[3+2+i*4]);
-            p.B2=atoi(argv[3+3+i*4]);
+            p.R1=atoi(argv[2+i*4]);
+            p.B1=atoi(argv[2+1+i*4]);
+            p.R2=atoi(argv[2+2+i*4]);
+            p.B2=atoi(argv[2+3+i*4]);
             maxCycle=maxCycle+p.R1+p.R2+p.B1+p.B2;
             //set every process to be ready
             strcpy(p.status,"Ready");
@@ -221,7 +208,7 @@ int main(int argc){
     else{
         //RR
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
-        int q=atoi(argv[3]);
+        int q=atoi(argv[2]);
         struct Process processes[100];
         int currentTime=0;
         int maxCycle=0;
@@ -234,13 +221,13 @@ int main(int argc){
         for (int i=0; i<n; i++){
             struct Process p;
             p.processNumber=i;
-            p.R1=atoi(argv[4+i*4]);
+            p.R1=atoi(argv[3+i*4]);
             // printf("R1: %d\n",p.R1);
-            p.B1=atoi(argv[4+1+i*4]);
+            p.B1=atoi(argv[3+1+i*4]);
             // printf("B1: %d\n",p.B1);
-            p.R2=atoi(argv[4+2+i*4]);
+            p.R2=atoi(argv[3+2+i*4]);
             // printf("R2: %d\n",p.R2);
-            p.B2=atoi(argv[4+3+i*4]);
+            p.B2=atoi(argv[3+3+i*4]);
             // printf("B2: %d\n",p.B2);
             maxCycle=maxCycle+p.R1+p.R2+p.B1+p.B2;
             //set every process to be ready
