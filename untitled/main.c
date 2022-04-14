@@ -45,7 +45,7 @@ int main(){
 
     argv = realloc (argv, sizeof (char*) * (n_spaces+1));
     argv[n_spaces] = 0;
-
+    printf("Cycle       P1 State       P2 State      Comment\n");
 
     int n=atoi(argv[1]);
     int algo=atoi(argv[0]);
@@ -86,7 +86,7 @@ int main(){
             if(done==n){//if no process is left
                 break;
             }
-            printf("Cycle %d\n",i+1);
+            printf("%d           ",i+1);
             hasReadyProcess=-1;
             if(isIdle==0){//if there is a process running
                 for(int j=0;j<n;j++){//find the running process
@@ -113,7 +113,10 @@ int main(){
                                 // if(isIdle){
                                 //compare with other ready processes
                                 strcpy(processes[j].status,"Terminate");
-                                printf("P%d state: %s \n",j+1,processes[j].status);
+                                printf(" %s        ",processes[j].status);
+                                if(j == n-1){
+                                    printf("\n");
+                                }
                                 done++;
                                 // }
                             }
@@ -179,7 +182,7 @@ int main(){
                             if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process finished blocking
                                 if(processes[j].currentPhase==3){
                                     strcpy(processes[j].status,"Terminate");
-                                    printf("P%d state: %s \n",j+1,processes[j].status);
+                                    printf("%s ",processes[j].status);
                                     done++;
                                 }
                                 else{
@@ -200,7 +203,10 @@ int main(){
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
                 }
-                printf("P%d state: %s \n",j+1,processes[j].status);
+                printf("%s         ",processes[j].status);
+                if(j == n-1){
+                    printf("\n");
+                }
             }
         }
     }
@@ -248,7 +254,7 @@ int main(){
             if(done==n){//if no process is left
                 break;
             }
-            printf("Cycle %d\n",i+1);
+            printf("%d           ",i+1);
             hasReadyProcess=-1;
             if(isIdle==0){//if there is a process running
                 for(int j=0;j<n;j++){//find the running process
@@ -326,7 +332,7 @@ int main(){
                             hasReadyProcess=1;
                             isIdle=0;
                             process_chosen_to_run=&processes[j];
-                            printf("p%d chosen to run\n",j+1);
+                            //printf("p%d chosen to run\n",j+1);
                         }
                         else{
                             // compare the ready time and choose a process to run
@@ -440,7 +446,10 @@ int main(){
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
                 }
-                printf("P%d state: %s \n",j+1,processes[j].status);
+                printf("%s       ",processes[j].status);
+                if(j == n-1){
+                    printf("\n");
+                }
             }
         }
     }
