@@ -22,16 +22,15 @@ struct Process{
 int main(){
 
     char str[51];
+    int i,j;
 
     fgets(str, sizeof(str), stdin);
-    //printf("%s",str);
 
     char ** argv  = NULL;
     char * p  = strtok (str, " ");
     int n_spaces = 0;
 
     while (p) {
-        printf("%s",p);
         argv = realloc (argv, sizeof (char*) * ++n_spaces);
 
         if (argv == NULL)
@@ -47,20 +46,20 @@ int main(){
     argv[n_spaces] = 0;
     printf("Cycle       P1 State       P2 State      Comment\n");
 
-    int n=atoi(argv[1]);
-    int algo=atoi(argv[0]);
-
+    int n=atoi(argv[0]);
+    int algo=atoi(argv[1]);
     if(algo == 1){
         //FIFO
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
-        struct Process processes[100];
+
+struct Process processes[100];
         int maxCycle=0;
         int isIdle=1;
         int done=0;
         int hasReadyProcess;
         struct Process *process_chosen_to_run;
 
-        for (int i=0; i<n; i++){
+        for ( i=0; i<n; i++){
             struct Process p;
             p.processNumber=i;
             p.R1=atoi(argv[2+i*4]);
@@ -82,14 +81,14 @@ int main(){
 
         process_chosen_to_run=&processes[0];
 
-        for(int i=0;i<maxCycle;i++){//loop thru each cycle
+        for( i=0;i<maxCycle;i++){//loop thru each cycle
             if(done==n){//if no process is left
                 break;
             }
             printf("%d           ",i+1);
             hasReadyProcess=-1;
             if(isIdle==0){//if there is a process running
-                for(int j=0;j<n;j++){//find the running process
+                for( j=0;j<n;j++){//find the running process
                     if(strcmp(processes[j].status,"Terminate")==0){
                         continue;
                     }
@@ -135,7 +134,7 @@ int main(){
                 }
             }
             if(isIdle==1){//if there is no process running
-                for(int j=0;j<n;j++){//find a ready process to run
+                for( j=0;j<n;j++){//find a ready process to run
                     if(strcmp(processes[j].status,"Terminate")==0){//disregard the terminated process
                         continue;
                     }
@@ -177,7 +176,7 @@ int main(){
                 }
                 // if no ready process is found and the cpu is idle, update the blocked processes
                 if(hasReadyProcess==-1){
-                    for(int j=0;j<n;j++){
+                    for( j=0;j<n;j++){
                         if((strcmp(processes[j].status,"Blocked")==0)&& (processes[j].blockedInCycle!=i)){//find the blocked processes
                             if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process finished blocking
                                 if(processes[j].currentPhase==3){
@@ -199,7 +198,7 @@ int main(){
                     }
                 }
             }
-            for(int j=0;j<n;j++){
+            for( j=0;j<n;j++){
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
                 }
@@ -224,7 +223,7 @@ int main(){
         int mark=-1;
         struct Process *process_chosen_to_run;
 
-        for (int i=0; i<n; i++){
+        for ( i=0; i<n; i++){
             struct Process p;
             p.processNumber=i;
             p.R1=atoi(argv[3+i*4]);
@@ -250,14 +249,14 @@ int main(){
 
         process_chosen_to_run=&processes[0];
 
-        for(int i=0;i<maxCycle;i++){//loop thru each cycle
+        for( i=0;i<maxCycle;i++){//loop thru each cycle
             if(done==n){//if no process is left
                 break;
             }
             printf("%d           ",i+1);
             hasReadyProcess=-1;
             if(isIdle==0){//if there is a process running
-                for(int j=0;j<n;j++){//find the running process
+                for( j=0;j<n;j++){//find the running process
                     if(strcmp(processes[j].status,"Terminate")==0){
                         continue;
                     }
@@ -316,7 +315,7 @@ int main(){
                 }
             }
             if(isIdle==1){//if there is no process running
-                for(int j=0;j<n;j++){//find a ready process to run
+                for( j=0;j<n;j++){//find a ready process to run
                     // printf("has ready process: %d\n",hasReadyProcess);
                     if(strcmp(processes[j].status,"Terminate")==0){//disregard the terminated processes
                         continue;
@@ -361,7 +360,7 @@ int main(){
                 //now run the process and update the attributes
                 if(hasReadyProcess==1){
                     int run_id=process_chosen_to_run->processNumber;
-                    for(int j=0;j<n;j++){//compare again
+                    for( j=0;j<n;j++){//compare again
                         if(processes[j].ready_time<processes[run_id].ready_time){
                             run_id=j;
                         }
@@ -389,7 +388,7 @@ int main(){
                 // if no ready process is found and the cpu is idle, update the blocked processes
                 if(hasReadyProcess==-1){
                     // printf("no ready process\n");
-                    for(int j=0;j<n;j++){
+                    for( j=0;j<n;j++){
                         if((strcmp(processes[j].status,"Blocked")==0)&& (processes[j].blockedInCycle!=i)){//find the blocked processes
                             // printf("found p%d, blocked\n",j+1);
                             if(processes[j].hasStayedChangedIn==i){//if the process hasstayed has just +1 in the same cycle
@@ -442,7 +441,7 @@ int main(){
                     }
                 }
             }
-            for(int j=0;j<n;j++){
+            for( j=0;j<n;j++){
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
                 }
