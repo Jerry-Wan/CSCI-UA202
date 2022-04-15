@@ -2,13 +2,11 @@
 #include<stdlib.h>
 #include <string.h>
 
-//process struct
 struct Process{
     int R1;
     int B1;
     int R2;
     int B2;
-    int q;
     int currentPhase;
     int hasStayed;
     int hasStayedChangedIn;
@@ -34,7 +32,7 @@ int main(){
         argv = realloc (argv, sizeof (char*) * ++n_spaces);
 
         if (argv == NULL)
-            exit (-1); /* memory allocation failed */
+            exit (-1);
 
         argv[n_spaces-1] = p;
 
@@ -49,10 +47,7 @@ int main(){
     int n=atoi(argv[0]);
     int algo=atoi(argv[1]);
     if(algo == 1){
-        //FIFO
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-struct Process processes[100];
+        struct Process processes[100];
         int maxCycle=0;
         int isIdle=1;
         int done=0;
@@ -85,7 +80,7 @@ struct Process processes[100];
             if(done==n){//if no process is left
                 break;
             }
-            printf("%d           ",i+1);
+            printf("%-12d",i+1);
             hasReadyProcess=-1;
             if(isIdle==0){//if there is a process running
                 for( j=0;j<n;j++){//find the running process
@@ -109,15 +104,13 @@ struct Process processes[100];
                     else if(strcmp(processes[j].status,"Blocked")==0){
                         if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process finished blocking
                             if(processes[j].currentPhase==3){
-                                // if(isIdle){
                                 //compare with other ready processes
                                 strcpy(processes[j].status,"Terminate");
-                                printf(" %s        ",processes[j].status);
+                                printf("%-15s",processes[j].status);
                                 if(j == n-1){
                                     printf("\n");
                                 }
                                 done++;
-                                // }
                             }
                             else{
                                 strcpy(processes[j].status,"Ready");
@@ -136,6 +129,7 @@ struct Process processes[100];
             if(isIdle==1){//if there is no process running
                 for( j=0;j<n;j++){//find a ready process to run
                     if(strcmp(processes[j].status,"Terminate")==0){//disregard the terminated process
+                        printf("               ");
                         continue;
                     }
                     if((strcmp(processes[j].status,"Ready")==0) && isIdle==1){//if there's a ready process
@@ -202,7 +196,7 @@ struct Process processes[100];
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
                 }
-                printf("%s         ",processes[j].status);
+                printf("%-15s",processes[j].status);
                 if(j == n-1){
                     printf("\n");
                 }
@@ -248,12 +242,11 @@ struct Process processes[100];
         }
 
         process_chosen_to_run=&processes[0];
-
         for( i=0;i<maxCycle;i++){//loop thru each cycle
             if(done==n){//if no process is left
                 break;
             }
-            printf("%d           ",i+1);
+            printf("%-12d",i+1);
             hasReadyProcess=-1;
             if(isIdle==0){//if there is a process running
                 for( j=0;j<n;j++){//find the running process
@@ -267,7 +260,8 @@ struct Process processes[100];
                             if (processes[j].hasStayed%q==0){//if the process should preempt
                                 strcpy(processes[j].status,"Ready");
                                 processes[j].ready_time=i;
-                                printf("P%d preempted, ready time %d\n",j+1,processes[j].ready_time+1);
+                                printf("%-15s",processes[j].status);
+                                //printf("P%d preempted, ready time %d\n",j+1,processes[j].ready_time+1);
                                 isIdle=1;
                                 mark=j;
                             }
@@ -302,7 +296,8 @@ struct Process processes[100];
                                 processes[j].ready_time=i;//set the process ready time to be current cycle
                                 processes[j].hasStayed=0;//clear out the phase hasStayed attribute
                                 processes[j].hasStayedChangedIn=i;
-                                printf("P%d changed to %s, ready time %d\n",j+1,processes[j].status,processes[j].ready_time+1);
+                                printf("%-20s",processes[j].status);
+                                //printf("P%d changed to %s, ready time %d\n",j+1,processes[j].status,processes[j].ready_time+1);
                             }
                         }
                         else{
@@ -414,7 +409,8 @@ struct Process processes[100];
                                         processes[j].hasStayed++;
                                         processes[j].hasStayedChangedIn++;
                                         processes[j].ready_time=i;
-                                        printf("P%d changed to %s, ready time %d\n",j+1,processes[j].status,processes[j].ready_time+1);
+                                        printf("%-s",processes[j].status);
+                                        //printf("P%d changed to %s, ready time %d\n",j+1,processes[j].status,processes[j].ready_time+1);
                                         isIdle=0;
                                     }
                                 }
@@ -445,7 +441,7 @@ struct Process processes[100];
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
                 }
-                printf("%s       ",processes[j].status);
+                printf("%-15s",processes[j].status);
                 if(j == n-1){
                     printf("\n");
                 }
