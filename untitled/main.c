@@ -3,30 +3,40 @@
 #include <string.h>
 
 struct Process{
-    int R1;
-    int B1;
-    int R2;
-    int B2;
+    int Run1;
+    int Block1;
+    int Run2;
+    int Block2;
     int currentPhase;
     int hasStayed;
     int hasStayedChangedIn;
-    int ready_time;
+    int readyTime;
     int processNumber;
     int blockedInCycle;
     char status[100];
-    int phase_time[100];
+    int phaseTime[100];
 };
 
 int main(){
 
     char str[51];
-    int i,j;
+    int  a,i,j,n,algo;
+    int blockedProcess;
+    struct Process processes[100];
+    int maxCycle=0;
+    int isIdle=1;
+    int done=0;
+    int hasReadyProcess;
+    int mark=-1;
+    struct Process *processChosenToRun;
+    char ** argv  = NULL;
+    char * p;
+    int n_spaces = 0;
 
     fgets(str, sizeof(str), stdin);
 
-    char ** argv  = NULL;
-    char * p  = strtok (str, " ");
-    int n_spaces = 0;
+    p  = strtok (str, " ");
+
 
     while (p) {
         argv = realloc (argv, sizeof (char*) * ++n_spaces);
@@ -42,69 +52,90 @@ int main(){
 
     argv = realloc (argv, sizeof (char*) * (n_spaces+1));
     argv[n_spaces] = 0;
-    printf("Cycle       P1 State       P2 State      Comment\n");
 
-    int n=atoi(argv[0]);
-    int algo=atoi(argv[1]);
+
+    n=atoi(argv[0]);
+    algo=atoi(argv[1]);
+
+    if(algo <1 || algo >2){
+        printf("Sorry, invalid algo detected");
+        exit(1);
+    }
+    if(n <1){
+        printf("Sorry, invalid number of process detected");
+        exit(1);
+    }
     if(algo == 1){
-        struct Process processes[100];
-        int maxCycle=0;
-        int isIdle=1;
-        int done=0;
-        int hasReadyProcess;
-        struct Process *process_chosen_to_run;
+        if(argv[n*4+1] == NULL ||argv[n*4+2] != NULL ){
+            printf("Sorry, invalid number of process time detected");
+            exit(1);
+        }
+    }
+    else{
+        if(argv[n*4+2] == NULL ||argv[n*4+3] != NULL){
+            printf("Sorry, invalid number of process time detected");
+            exit(1);
+        }
+    }
+
+    printf("Cycle       ");
+    for(a = 0; a<n;a++){
+        printf("P%d State       ",a+1);
+    }
+        printf("Comment\n");
+
+
+
+    if(algo == 1){
 
         for ( i=0; i<n; i++){
             struct Process p;
             p.processNumber=i;
-            p.R1=atoi(argv[2+i*4]);
-            p.B1=atoi(argv[2+1+i*4]);
-            p.R2=atoi(argv[2+2+i*4]);
-            p.B2=atoi(argv[2+3+i*4]);
-            maxCycle=maxCycle+p.R1+p.R2+p.B1+p.B2;
-            //set every process to be ready
+            p.Run1=atoi(argv[2+i*4]);
+            p.Block1=atoi(argv[2+1+i*4]);
+            p.Run2=atoi(argv[2+2+i*4]);
+            p.Block2=atoi(argv[2+3+i*4]);
+            maxCycle=maxCycle+p.Run1+p.Run2+p.Block1+p.Block2;
             strcpy(p.status,"Ready");
-            p.ready_time=0;
-            p.phase_time[0]=p.R1;
-            p.phase_time[1]=p.B1;
-            p.phase_time[2]=p.R2;
-            p.phase_time[3]=p.B2;
+            p.readyTime=0;
+            p.phaseTime[0]=p.Run1;
+            p.phaseTime[1]=p.Block1;
+            p.phaseTime[2]=p.Run2;
+            p.phaseTime[3]=p.Block2;
             p.currentPhase=-1;
             p.hasStayed=0;
             processes[i]=p;
         }
 
-        process_chosen_to_run=&processes[0];
+        processChosenToRun=&processes[0];
 
-        for( i=0;i<maxCycle;i++){//loop thru each cycle
-            if(done==n){//if no process is left
+        for( i=0;i<maxCycle;i++){
+            if(done==n){
                 break;
             }
             printf("%-12d",i+1);
             hasReadyProcess=-1;
-            if(isIdle==0){//if there is a process running
-                for( j=0;j<n;j++){//find the running process
+            if(isIdle==0){
+                for( j=0;j<n;j++){
                     if(strcmp(processes[j].status,"Terminate")==0){
                         continue;
                     }
-                    if(strcmp(processes[j].status,"Run")==0){
-                        if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process has finished running
+                    else if(strcmp(processes[j].status,"Run")==0){
+                        if(processes[j].hasStayed==processes[j].phaseTime[processes[j].currentPhase]){
                             strcpy(processes[j].status,"Blocked");
                             processes[j].blockedInCycle=i;
                             processes[j].hasStayed=0;
-                            // printf("P%d blocked\n",j+1);
                             isIdle=1;
                             processes[j].hasStayed++;
                             processes[j].currentPhase++;
                         }
-                        else{//if the process is still running
-                            processes[j].hasStayed++;//increment the progress
+                        else{
+                            processes[j].hasStayed++;
                         }
                     }
                     else if(strcmp(processes[j].status,"Blocked")==0){
-                        if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process finished blocking
+                        if(processes[j].hasStayed==processes[j].phaseTime[processes[j].currentPhase]){
                             if(processes[j].currentPhase==3){
-                                //compare with other ready processes
                                 strcpy(processes[j].status,"Terminate");
                                 printf("%-15s",processes[j].status);
                                 if(j == n-1){
@@ -114,79 +145,68 @@ int main(){
                             }
                             else{
                                 strcpy(processes[j].status,"Ready");
-                                processes[j].ready_time=i;//set the process ready time to be current cycle
-                                processes[j].hasStayed=0;//clear out the phase hasStayed attribute
+                                processes[j].readyTime=i;
+                                processes[j].hasStayed=0;
                             }
                         }
                         else{
                             processes[j].hasStayed++;
-                            // printf("P%d blocked +1, now blocked for %d\n",j+1,processes[j].hasStayed);
                         }
                     }
-                    // printf("P%d state: %s \n",j+1,processes[j].status);
                 }
             }
-            if(isIdle==1){//if there is no process running
-                for( j=0;j<n;j++){//find a ready process to run
-                    if(strcmp(processes[j].status,"Terminate")==0){//disregard the terminated process
+            if(isIdle==1){
+                for( j=0;j<n;j++){
+                    if(strcmp(processes[j].status,"Terminate")==0){
                         printf("               ");
                         continue;
                     }
-                    if((strcmp(processes[j].status,"Ready")==0) && isIdle==1){//if there's a ready process
-                        //if it is the first ready process found, set process_chosen_to_run
+                    if((strcmp(processes[j].status,"Ready")==0) && isIdle==1){
                         if(hasReadyProcess==-1){
                             hasReadyProcess=1;
                             isIdle=0;
-                            process_chosen_to_run=&processes[j];
+                            processChosenToRun=&processes[j];
                         }
                         else{
-                            // compare the ready time and choose a process to run
-                            if(processes[j].ready_time>process_chosen_to_run->ready_time){//if current process_to_run is created earlier
-                                continue;//do nothing
+                            if(processes[j].readyTime>processChosenToRun->readyTime) {
+                                continue;
                             }
-                                // if they have equal creation times
-                            else if(processes[j].ready_time==process_chosen_to_run->ready_time){
-                                //choose alphabetically
-                                if(processes[j].processNumber>=process_chosen_to_run->processNumber){//if current process_to_run is alphabetically smaller
+                            else if(processes[j].readyTime==processChosenToRun->readyTime){
+                                if(processes[j].processNumber>=processChosenToRun->processNumber){
                                     continue;
                                 }
-                                else{//if current process_to_run is bigger
-                                    process_chosen_to_run=&processes[j];//set new process_to_run
+                                else{
+                                    processChosenToRun=&processes[j];
                                 }
                             }
-                            else{//
-                                process_chosen_to_run=&processes[j];
+                            else{
+                                processChosenToRun=&processes[j];
                             }
                         }
                     }
-                    // printf("P%d state: %s \n",j+1,processes[j].status);
                 }
-                // printf("has ready process: %d\n",hasReadyProcess);
-                //now run the process and update the attributes
                 if(hasReadyProcess==1){
-                    strcpy(process_chosen_to_run->status,"Run");//problem: shouldn't rerun the blocked processes
-                    process_chosen_to_run->currentPhase++;
-                    process_chosen_to_run->hasStayed++;
+                    strcpy(processChosenToRun->status,"Run");
+                    processChosenToRun->currentPhase++;
+                    processChosenToRun->hasStayed++;
                 }
-                // if no ready process is found and the cpu is idle, update the blocked processes
                 if(hasReadyProcess==-1){
                     for( j=0;j<n;j++){
-                        if((strcmp(processes[j].status,"Blocked")==0)&& (processes[j].blockedInCycle!=i)){//find the blocked processes
-                            if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process finished blocking
+                        if((strcmp(processes[j].status,"Blocked")==0)&& (processes[j].blockedInCycle!=i)){
+                            if(processes[j].hasStayed==processes[j].phaseTime[processes[j].currentPhase]){
                                 if(processes[j].currentPhase==3){
                                     strcpy(processes[j].status,"Terminate");
-                                    printf("%s ",processes[j].status);
+                                    printf("%-15s",processes[j].status);
                                     done++;
                                 }
                                 else{
                                     strcpy(processes[j].status,"Ready");
-                                    processes[j].ready_time=i;//set the process ready time to be current cycle
-                                    processes[j].hasStayed=0;//clear out the phase hasStayed attribute
+                                    processes[j].readyTime=i;
+                                    processes[j].hasStayed=0;
                                 }
                             }
                             else{
                                 processes[j].hasStayed++;
-                                // printf("P%d blocked +1, now blocked for %d\n",j+1,processes[j].hasStayed);
                             }
                         }
                     }
@@ -197,51 +217,39 @@ int main(){
                     continue;
                 }
                 printf("%-15s",processes[j].status);
-                if(j == n-1){
+                if(j == n-1 && i!= 0){
                     printf("\n");
+                }
+                if(i == 0 && j == n-1){
+                    printf("Both created; P1 wins tiebreak\n");
                 }
             }
         }
     }
 
     else{
-        //RR
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
         int q=atoi(argv[2]);
-        struct Process processes[100];
-        int currentTime=0;
-        int maxCycle=0;
-        int isIdle=1;
-        int done=0;
-        int hasReadyProcess;
-        int mark=-1;
-        struct Process *process_chosen_to_run;
 
         for ( i=0; i<n; i++){
             struct Process p;
             p.processNumber=i;
-            p.R1=atoi(argv[3+i*4]);
-            // printf("R1: %d\n",p.R1);
-            p.B1=atoi(argv[3+1+i*4]);
-            // printf("B1: %d\n",p.B1);
-            p.R2=atoi(argv[3+2+i*4]);
-            // printf("R2: %d\n",p.R2);
-            p.B2=atoi(argv[3+3+i*4]);
-            // printf("B2: %d\n",p.B2);
-            maxCycle=maxCycle+p.R1+p.R2+p.B1+p.B2;
-            //set every process to be ready
+            p.Run1=atoi(argv[3+i*4]);
+            p.Block1=atoi(argv[3+1+i*4]);
+            p.Run2=atoi(argv[3+2+i*4]);
+            p.Block2=atoi(argv[3+3+i*4]);
+            maxCycle=maxCycle+p.Run1+p.Run2+p.Block1+p.Block2;
             strcpy(p.status,"Ready");
-            p.ready_time=0;
-            p.phase_time[0]=p.R1;
-            p.phase_time[1]=p.B1;
-            p.phase_time[2]=p.R2;
-            p.phase_time[3]=p.B2;
+            p.readyTime=0;
+            p.phaseTime[0]=p.Run1;
+            p.phaseTime[1]=p.Block1;
+            p.phaseTime[2]=p.Run2;
+            p.phaseTime[3]=p.Block2;
             p.currentPhase=-1;
             p.hasStayed=0;
             processes[i]=p;
         }
 
-        process_chosen_to_run=&processes[0];
+        processChosenToRun=&processes[0];
         for( i=0;i<maxCycle;i++){//loop thru each cycle
             if(done==n){//if no process is left
                 break;
@@ -254,14 +262,10 @@ int main(){
                         continue;
                     }
                     if(strcmp(processes[j].status,"Run")==0){
-                        // printf("p%d has stayed %d\n",j+1,processes[j].hasStayed);
-                        // printf("p%d current phase %d\n",j+1,processes[j].currentPhase);
-                        if(processes[j].hasStayed!=processes[j].phase_time[processes[j].currentPhase]){//if the process is still running
+                        if(processes[j].hasStayed!=processes[j].phaseTime[processes[j].currentPhase]){//if the process is still running
                             if (processes[j].hasStayed%q==0){//if the process should preempt
                                 strcpy(processes[j].status,"Ready");
-                                processes[j].ready_time=i;
-                                printf("%-15s",processes[j].status);
-                                //printf("P%d preempted, ready time %d\n",j+1,processes[j].ready_time+1);
+                                processes[j].readyTime=i;
                                 isIdle=1;
                                 mark=j;
                             }
@@ -270,12 +274,10 @@ int main(){
                                 processes[j].hasStayedChangedIn=i;
                             }
                         }
-                        else if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process has finished running
-                            // printf("P%d has stayed %d, current phase is %d\n",j+1,processes[j].hasStayed,processes[j].currentPhase);
+                        else if(processes[j].hasStayed==processes[j].phaseTime[processes[j].currentPhase]){//if the process has finished running
                             strcpy(processes[j].status,"Blocked");
                             processes[j].blockedInCycle=i;
                             processes[j].hasStayed=0;
-                            // printf("P%d blocked\n",j+1);
                             isIdle=1;
                             processes[j].hasStayed++;
                             processes[j].hasStayedChangedIn=i;
@@ -283,122 +285,101 @@ int main(){
                         }
                     }
                     else if(strcmp(processes[j].status,"Blocked")==0){
-                        if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process finished blocking
+                        if(processes[j].hasStayed==processes[j].phaseTime[processes[j].currentPhase]){//if the process finished blocking
                             if(processes[j].currentPhase==3){
                                 if(isIdle){
                                     strcpy(processes[j].status,"Terminate");
-                                    // printf("P%d state: %s \n",j+1,processes[j].status);
                                     done++;
                                 }
                             }
                             else{
                                 strcpy(processes[j].status,"Ready");
-                                processes[j].ready_time=i;//set the process ready time to be current cycle
+                                processes[j].readyTime=i;//set the process ready time to be current cycle
                                 processes[j].hasStayed=0;//clear out the phase hasStayed attribute
                                 processes[j].hasStayedChangedIn=i;
-                                printf("%-20s",processes[j].status);
-                                //printf("P%d changed to %s, ready time %d\n",j+1,processes[j].status,processes[j].ready_time+1);
                             }
                         }
                         else{
                             processes[j].hasStayed++;
                             processes[j].hasStayedChangedIn=i;
-                            // printf("P%d blocked +1, now blocked for %d\n",j+1,processes[j].hasStayed);
                         }
                     }
-                    // printf("P%d state: %s \n",j+1,processes[j].status);
                 }
             }
             if(isIdle==1){//if there is no process running
                 for( j=0;j<n;j++){//find a ready process to run
-                    // printf("has ready process: %d\n",hasReadyProcess);
                     if(strcmp(processes[j].status,"Terminate")==0){//disregard the terminated processes
+                        printf("               ");
                         continue;
                     }
                     //if there's a ready process
                     if((strcmp(processes[j].status,"Ready")==0) && isIdle==1){
-                        // printf("P%d is ready to run\n",j+1);
-                        // printf("P%d status is %s\n",j+1,processes[j].status);
                         if(mark==j){//if it was just-preempted
                             continue;
                         }
                         if(hasReadyProcess==-1){//if it is the first ready process found, set process_chosen_to_run
                             hasReadyProcess=1;
                             isIdle=0;
-                            process_chosen_to_run=&processes[j];
-                            //printf("p%d chosen to run\n",j+1);
+                            processChosenToRun=&processes[j];
                         }
                         else{
                             // compare the ready time and choose a process to run
-                            if(processes[j].ready_time>process_chosen_to_run->ready_time){//if current process_to_run is created earlier
+                            if(processes[j].readyTime>processChosenToRun->readyTime){//if current process_to_run is created earlier
                                 continue;//do nothing
                             }
                                 // if they have equal creation times
-                            else if(processes[j].ready_time==process_chosen_to_run->ready_time){
+                            else if(processes[j].readyTime==processChosenToRun->readyTime){
                                 //choose alphabetically
-                                if(processes[j].processNumber>=process_chosen_to_run->processNumber){//if current process_to_run is alphabetically smaller
+                                if(processes[j].processNumber>=processChosenToRun->processNumber){//if current process_to_run is alphabetically smaller
                                     continue;
                                 }
                                 else{//if current process_to_run is bigger
-                                    process_chosen_to_run=&processes[j];//set new process_to_run
+                                    processChosenToRun=&processes[j];//set new process_to_run
                                 }
                             }
                             else{//
-                                process_chosen_to_run=&processes[j];
+                                processChosenToRun=&processes[j];
                             }
 
                         }
                     }
-                    // printf("P%d state: %s \n",j+1,processes[j].status);
                 }
-                // printf("has ready process: %d\n",hasReadyProcess);
-                //now run the process and update the attributes
                 if(hasReadyProcess==1){
-                    int run_id=process_chosen_to_run->processNumber;
+                    int run_id=processChosenToRun->processNumber;
                     for( j=0;j<n;j++){//compare again
-                        if(processes[j].ready_time<processes[run_id].ready_time){
+                        if(processes[j].readyTime<processes[run_id].readyTime){
                             run_id=j;
                         }
-                        if(processes[j].ready_time==processes[run_id].ready_time){
+                        if(processes[j].readyTime==processes[run_id].readyTime){
                             if(processes[j].processNumber<processes[run_id].processNumber){
                                 run_id=j;
                             }
                         }
                     }
-                    process_chosen_to_run=&processes[run_id];
-                    strcpy(process_chosen_to_run->status,"Run");
-                    // printf("P%d chosen to run\n",process_chosen_to_run->processNumber+1);
-                    if(process_chosen_to_run->currentPhase==-1 || //if the process hasn't been started
-                       process_chosen_to_run->currentPhase==1 || //if the process was previously blocked
-                       process_chosen_to_run->currentPhase==3){//if the process was previously blocked
-                        // printf("current phase +1\n");
-                        // printf("mark: %d\n",mark);
-                        // printf("process num: %d\n",process_chosen_to_run->processNumber);
-                        process_chosen_to_run->currentPhase++;
+                    processChosenToRun=&processes[run_id];
+                    strcpy(processChosenToRun->status,"Run");
+                    if(processChosenToRun->currentPhase==-1 ||processChosenToRun->currentPhase==1 ||processChosenToRun->currentPhase==3){
+                        processChosenToRun->currentPhase++;
                     }
-                    process_chosen_to_run->hasStayed++;
-                    process_chosen_to_run->hasStayedChangedIn=i;
-                    // printf("P%d has stayed %d\n",process_chosen_to_run->processNumber+1,process_chosen_to_run->hasStayed);
+                    processChosenToRun->hasStayed++;
+                    processChosenToRun->hasStayedChangedIn=i;
                 }
                 // if no ready process is found and the cpu is idle, update the blocked processes
                 if(hasReadyProcess==-1){
-                    // printf("no ready process\n");
                     for( j=0;j<n;j++){
                         if((strcmp(processes[j].status,"Blocked")==0)&& (processes[j].blockedInCycle!=i)){//find the blocked processes
-                            // printf("found p%d, blocked\n",j+1);
                             if(processes[j].hasStayedChangedIn==i){//if the process hasstayed has just +1 in the same cycle
                                 continue;
                             }
-                            if(processes[j].hasStayed==processes[j].phase_time[processes[j].currentPhase]){//if the process finished blocking
+                            if(processes[j].hasStayed==processes[j].phaseTime[processes[j].currentPhase]){//if the process finished blocking
                                 if(processes[j].currentPhase==3 && isIdle==1){
                                     strcpy(processes[j].status,"Terminate");
-                                    // printf("P%d state: %s \n",j+1,processes[j].status);
                                     done++;
                                 }
                                 else{
                                     if(isIdle==0){//if is not idle
                                         strcpy(processes[j].status,"Ready");
-                                        processes[j].ready_time=i;//set the process ready time to be current cycle
+                                        processes[j].readyTime=i;//set the process ready time to be current cycle
                                         processes[j].hasStayed=0;//clear out the phase hasStayed attribute
                                         processes[j].hasStayedChangedIn=i;
                                     }
@@ -408,9 +389,7 @@ int main(){
                                         processes[j].currentPhase++;
                                         processes[j].hasStayed++;
                                         processes[j].hasStayedChangedIn++;
-                                        processes[j].ready_time=i;
-                                        printf("%-s",processes[j].status);
-                                        //printf("P%d changed to %s, ready time %d\n",j+1,processes[j].status,processes[j].ready_time+1);
+                                        processes[j].readyTime=i;
                                         isIdle=0;
                                     }
                                 }
@@ -418,11 +397,9 @@ int main(){
                             else{
                                 processes[j].hasStayed++;
                                 processes[j].hasStayedChangedIn=i;
-                                // printf("P%d blocked +1, now blocked for %d\n",j+1,processes[j].hasStayed);
                             }
                         }
                         if(strcmp(processes[j].status,"Ready")==0 && mark==j){//find the ready process if no process is running
-                            // printf("ready\n");
                             strcpy(processes[mark].status,"Run");//run the just preempted process
                             processes[mark].hasStayed++;
                             processes[mark].hasStayedChangedIn=i;
@@ -438,11 +415,21 @@ int main(){
                 }
             }
             for( j=0;j<n;j++){
+                blockedProcess = 0;
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
                 }
+                if(strcmp(processes[j].status,"Blocked")==0){
+                    blockedProcess+=1;
+                }
                 printf("%-15s",processes[j].status);
-                if(j == n-1){
+                if(i == 0 && j == n-1){
+                    printf("Both created; P1 wins tiebreak\n");
+                }
+                else if(blockedProcess == n-1 && j == n-1){
+                    printf("CPU idle\n");
+                }
+                else  if(j == n-1 && i!= 0){
                     printf("\n");
                 }
             }
