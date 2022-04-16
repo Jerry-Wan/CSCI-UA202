@@ -14,6 +14,7 @@ struct Process{
     int processNumber;
     int blockedInCycle;
     char status[100];
+    char prevStatus[100];
     int phaseTime[100];
 };
 
@@ -32,6 +33,8 @@ int main(){
     char ** argv  = NULL;
     char * p;
     int n_spaces = 0;
+    int preemptIndex = -1;
+    int blockIndex = -1;
 
     fgets(str, sizeof(str), stdin);
 
@@ -239,6 +242,7 @@ int main(){
             p.Block2=atoi(argv[3+3+i*4]);
             maxCycle=maxCycle+p.Run1+p.Run2+p.Block1+p.Block2;
             strcpy(p.status,"Ready");
+            strcpy(p.prevStatus,"Ready");
             p.readyTime=0;
             p.phaseTime[0]=p.Run1;
             p.phaseTime[1]=p.Block1;
@@ -374,6 +378,7 @@ int main(){
                             if(processes[j].hasStayed==processes[j].phaseTime[processes[j].currentPhase]){//if the process finished blocking
                                 if(processes[j].currentPhase==3 && isIdle==1){
                                     strcpy(processes[j].status,"Terminate");
+                                    printf("%-15s",processes[j].status);
                                     done++;
                                 }
                                 else{
@@ -414,10 +419,14 @@ int main(){
                     }
                 }
             }
+            blockedProcess = 0;
             for( j=0;j<n;j++){
-                blockedProcess = 0;
+
                 if(strcmp(processes[j].status,"Terminate")==0){
                     continue;
+                }
+                if(strcmp(processes[j].prevStatus,"Run")==0 && strcmp(processes[j].status,"Ready")==0){
+                    preemptIndex = j+1;
                 }
                 if(strcmp(processes[j].status,"Blocked")==0){
                     blockedProcess+=1;
@@ -426,12 +435,17 @@ int main(){
                 if(i == 0 && j == n-1){
                     printf("Both created; P1 wins tiebreak\n");
                 }
-                else if(blockedProcess == n-1 && j == n-1){
+                else if(blockedProcess == n && j == n-1){
                     printf("CPU idle\n");
                 }
-                else  if(j == n-1 && i!= 0){
+                else if(preemptIndex >0 && j == n-1){
+                    printf("P%d preempted\n",preemptIndex);
+                    preemptIndex = -1;
+                }
+                else if(j == n-1 && i!= 0){
                     printf("\n");
                 }
+                strcpy(processes[j].prevStatus,processes[j].status);
             }
         }
     }
